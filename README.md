@@ -8,7 +8,7 @@
     <h3>Streams</h3>
   </p>
   <p>
-    <strong>Stream utilities & helpers array for Node.js
+    Stream utilities & helpers array for Node.js
   </p>
   <br/>
   <p>
