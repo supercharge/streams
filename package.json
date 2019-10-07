@@ -2,20 +2,24 @@
   "name": "@supercharge/streams",
   "description": "Supercharge Streams",
   "version": "0.0.0",
-  "author": "Marcus Pöhls <marcus@futurestud.io>",
+  "author": "Marcus Pöhls <marcus@superchargejs.com>",
   "bugs": {
     "url": "https://github.com/superchargejs/streams/issues"
   },
+  "dependencies": {
+    "@supercharge/queue-datastructure": "~1.1.1",
+    "into-stream": "~5.1.1"
+  },
   "devDependencies": {
     "@hapi/code": "~6.0.0",
-    "@hapi/lab": "~20.3.2",
-    "eslint": "~6.5.0",
+    "@hapi/lab": "~20.4.0",
+    "eslint": "~6.5.1",
     "eslint-config-standard": "~14.1.0",
     "eslint-plugin-import": "~2.18.2",
     "eslint-plugin-node": "~10.0.0",
     "eslint-plugin-promise": "~4.2.1",
     "eslint-plugin-standard": "~4.0.1",
-    "sinon": "~7.5.0"
+    "get-stream": "~5.1.0"
   },
   "engines": {
     "node": ">=8"
@@ -38,9 +42,9 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "lint-fix": "eslint . --fix",
-    "list-tests": "lab --assert @hapi/code --dry --verbose",
+    "lint:fix": "eslint . --fix",
+    "list:tests": "lab --assert @hapi/code --dry --verbose",
     "test": "lab --assert @hapi/code --leaks --coverage --lint --reporter console --output stdout --reporter html --output ./coverage/coverage.html",
-    "test-single": "lab --assert @hapi/code --leaks --lint --id"
+    "test:single": "lab --assert @hapi/code --leaks --lint --id"
   }
 }
