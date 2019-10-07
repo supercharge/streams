@@ -8,7 +8,7 @@
     <h3>Streams</h3>
   </p>
   <p>
-    Stream utilities & helpers array for Node.js
+    async/await-ready, chainable streaming utilities for Node.js
   </p>
   <br/>
   <p>
