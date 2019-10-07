@@ -67,6 +67,16 @@ class StreamProxy {
   }
 
   /**
+   * Processes the collection pipeline and returns
+   * all items in the collection.
+   *
+   * @returns {StreamProxy}
+   */
+  pipe (output) {
+    this._process(output).pipe(output)
+  }
+
+  /**
    * Creates and processes the stream pipeline.
    *
    * @returns {Readable}
@@ -76,16 +86,11 @@ class StreamProxy {
     const streams = [stream.asStream()]
 
     while (this.callChain.isNotEmpty()) {
-      try {
-        const { method, callback, data } = this.callChain.dequeue()
+      const { method, callback, data } = this.callChain.dequeue()
 
-        streams.push(
-          callback ? stream[method](callback, data) : stream[method](data)
-        )
-      } catch (error) {
-        this.callChain.clear()
-        throw error
-      }
+      streams.push(
+        callback ? stream[method](callback, data) : stream[method](data)
+      )
     }
 
     if (streams.length > 1) {
@@ -95,16 +100,6 @@ class StreamProxy {
     }
 
     return stream.asStream()
-  }
-
-  /**
-   * Processes the collection pipeline and returns
-   * all items in the collection.
-   *
-   * @returns {StreamProxy}
-   */
-  pipe (output) {
-    this._process().pipe(output)
   }
 }
 

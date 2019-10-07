@@ -2,9 +2,9 @@
 
 const Stream = require('..')
 const Lab = require('@hapi/lab')
-const { Readable } = require('stream')
 const GetStream = require('get-stream')
 const { expect } = require('@hapi/code')
+const { Readable, Writable } = require('stream')
 
 const { describe, it } = (exports.lab = Lab.script())
 
@@ -50,5 +50,30 @@ describe('Streams', () => {
           .asStream()
       )
     ).to.equal([{ name: 'Marcus', supercharged: true }])
+  })
+
+  it('.pipe()', async () => {
+    const result = []
+
+    const output = new Writable({
+      objectMode: true,
+
+      write (chunk, _, next) {
+        result.push(chunk)
+        next()
+      }
+    })
+
+    output.on('finish', () => {
+      expect(result).to.equal([{ name: 'Marcus', supercharged: true }])
+    })
+
+    Stream([
+      { name: 'Marcus', supercharged: true },
+      { name: 'Express-Dude', supercharged: false }
+    ])
+      .inObjectMode()
+      .filter(item => item.supercharged)
+      .pipe(output)
   })
 })

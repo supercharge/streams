@@ -29,13 +29,13 @@ class Streams {
    * testing function should return `true` if an item
    * should be included in the resulting collection.
    *
-   * @param {Function} callback
+   * @param {Function} test
    *
    * @returns {Streams}
    */
-  filter (callback) {
+  filter (test) {
     return this.through(async (chunk, encoding) => {
-      const result = await callback(chunk, encoding)
+      const result = await test(chunk, encoding)
 
       return result ? chunk : null
     })
@@ -63,16 +63,6 @@ class Streams {
         }
       }
     })
-  }
-
-  /**
-   * Processes the collection pipeline and returns
-   * all items in the collection.
-   *
-   * @returns {Streams}
-   */
-  pipe (output) {
-    this.stream.pipe(output)
   }
 }
 
