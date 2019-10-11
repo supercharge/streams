@@ -1,8 +1,8 @@
 'use strict'
 
 const Stream = require('./streams')
-const { Readable } = require('stream')
 const IntoStream = require('into-stream')
+const { Readable } = require('readable-stream')
 
 class PendingStream {
   /**

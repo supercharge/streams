@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "@supercharge/queue-datastructure": "~1.1.1",
-    "into-stream": "~5.1.1"
+    "into-stream": "~5.1.1",
+    "readable-stream": "~3.4.0"
   },
   "devDependencies": {
     "@hapi/code": "~6.0.0",

@@ -1,6 +1,6 @@
 'use strict'
 
-const { Transform } = require('stream')
+const { Transform } = require('readable-stream')
 
 class Streams {
   /**
@@ -39,6 +39,18 @@ class Streams {
 
       return result ? chunk : null
     })
+  }
+
+  /**
+   * Asynchronously map data from the stream. The `callback`
+   * testing function should return the mapped value.
+   *
+   * @param {Function} callback
+   *
+   * @returns {Streams}
+   */
+  map (callback) {
+    return this.through(callback)
   }
 
   /**

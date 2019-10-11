@@ -4,7 +4,7 @@ const Stream = require('..')
 const Lab = require('@hapi/lab')
 const GetStream = require('get-stream')
 const { expect } = require('@hapi/code')
-const { Readable, Writable } = require('stream')
+const { Readable, Writable } = require('readable-stream')
 
 const { describe, it } = (exports.lab = Lab.script())
 
@@ -77,26 +77,66 @@ describe('Streams', () => {
       .pipe(output)
   })
 
-  it('.through()', async () => {
+  it('.map()', async () => {
+    const result = []
+
     const output = new Writable({
       objectMode: true,
-      write (_, __, next) { next() }
+      write (chunk, __, next) {
+        result.push(chunk)
+        next()
+      }
+    }).on('finish', () => {
+      expect(result).to.equal([2, 4, 6])
     })
 
-    try {
+    Stream([1, 2, 3])
+      .inObjectMode()
+      .map(item => {
+        return item * 2
+      })
+      .pipe(output)
+  })
+
+  it('.on("error")', async () => {
+    const output = new Writable({
+      objectMode: true,
+      write (_, __, next) { next(_) }
+    })
+      .on('error', () => {})
+
+    await new Promise(resolve => {
       Stream([1, 2, 3])
         .inObjectMode()
-        .through(item => {
-          if (item > 1) {
-            throw new Error('wrong item')
-          }
+        .map(item => {
+          throw new Error('map error')
+        })
+        .on('error', error => {
+          expect(error.message).to.equal('map error')
+          resolve()
+        })
+        .pipe(output)
+    })
+  })
 
-          return item
+  it('.on("not-registered")', async () => {
+    try {
+      const output = new Writable({
+        objectMode: true,
+        write (_, __, next) { next(_) }
+      })
+        .on('error', () => {
+          console.log('error!')
+        })
+
+      Stream([1, 2, 3])
+        .inObjectMode()
+        .map(item => {
+          throw new Error('.through error')
         })
         .pipe(output)
     } catch (error) {
-      console.log('testing error')
-      console.log(error)
+
     }
   })
 })
