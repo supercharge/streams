@@ -76,4 +76,27 @@ describe('Streams', () => {
       .filter(item => item.supercharged)
       .pipe(output)
   })
+
+  it('.through()', async () => {
+    const output = new Writable({
+      objectMode: true,
+      write (_, __, next) { next() }
+    })
+
+    try {
+      Stream([1, 2, 3])
+        .inObjectMode()
+        .through(item => {
+          if (item > 1) {
+            throw new Error('wrong item')
+          }
+
+          return item
+        })
+        .pipe(output)
+    } catch (error) {
+      console.log('testing error')
+      console.log(error)
+    }
+  })
 })
