@@ -51,6 +51,19 @@ class StreamProxy {
   }
 
   /**
+   * Creates a transform stream that processes the given
+   * `callback` function and passes the resulting
+   * values and errors up to the next layer.
+   *
+   * @param {Function} callback
+   *
+   * @returns {StreamProxy}
+   */
+  through (callback) {
+    return this._enqueue('through', callback)
+  }
+
+  /**
    * Enqueues an operation in the collection pipeline
    * for processing at a later time.
    *
