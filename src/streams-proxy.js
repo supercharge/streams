@@ -1,10 +1,11 @@
 'use strict'
 
+const EventEmitter = require('events')
 const Stream = require('./pending-stream')
 const { pipeline } = require('readable-stream')
 const Queue = require('@supercharge/queue-datastructure')
 
-class StreamProxy {
+class StreamProxy extends EventEmitter {
   /**
    * Create a new streaming instance.
    *
@@ -13,8 +14,9 @@ class StreamProxy {
    * @returns {StreamProxy}
    */
   constructor (items, callChain = []) {
+    super()
+
     this.items = items
-    this.events = new Map()
     this.objectMode = false
     this.callChain = new Queue(callChain)
   }
@@ -35,12 +37,6 @@ class StreamProxy {
    */
   inObjectMode () {
     this.objectMode = true
-
-    return this
-  }
-
-  on (event, handler) {
-    this.events.set(event, handler)
 
     return this
   }
@@ -115,22 +111,18 @@ class StreamProxy {
     }
 
     if (streams.length > 1) {
-      return pipeline(...streams, error => {
-        if (error) {
-          this._handle(error)
+      return pipeline(
+        ...streams,
+        error => {
+          if (error) {
+            this.emit('error', error)
+            this.emit('end')
+          }
         }
-      })
+      )
     }
 
     return stream.asStream()
-  }
-
-  _handle (error) {
-    if (this.events.get('error')) {
-      return this.events.get('error')(error)
-    }
-
-    throw error
   }
 }
 

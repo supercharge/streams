@@ -108,7 +108,7 @@ describe('Streams', () => {
     await new Promise(resolve => {
       Stream([1, 2, 3])
         .inObjectMode()
-        .map(item => {
+        .map(() => {
           throw new Error('map error')
         })
         .on('error', error => {
@@ -117,26 +117,5 @@ describe('Streams', () => {
         })
         .pipe(output)
     })
-  })
-
-  it('.on("not-registered")', async () => {
-    try {
-      const output = new Writable({
-        objectMode: true,
-        write (_, __, next) { next(_) }
-      })
-        .on('error', () => {
-          console.log('error!')
-        })
-
-      Stream([1, 2, 3])
-        .inObjectMode()
-        .map(item => {
-          throw new Error('.through error')
-        })
-        .pipe(output)
-    } catch (error) {
-
-    }
   })
 })
