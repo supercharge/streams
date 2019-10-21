@@ -68,6 +68,43 @@ class StreamProxy extends EventEmitter {
   }
 
   /**
+   * Alias for `.pipe`. Processes the streaming
+   * pipeline and * ultimately pipes all chunks
+   * into the `destination` stream.
+   *
+   * @returns {Promise}
+   */
+  async into (destination) {
+    return this.pipe(destination)
+  }
+
+  /**
+   * Processes the streaming pipeline and ultimately
+   * pipes all chunks into the `destination` stream.
+   *
+   * @returns {Promise}
+   */
+  async pipe (destination) {
+    if (!destination) {
+      throw new Error('Missing destination stream for .pipe call')
+    }
+
+    const streams = this._streamsForPipeline().concat(destination)
+
+    return new Promise((resolve, reject) => {
+      pipeline(...streams, error => {
+        if (error) {
+          this.emit('end')
+
+          return reject(error)
+        }
+
+        return resolve()
+      })
+    })
+  }
+
+  /**
    * Enqueues an operation in the collection pipeline
    * for processing at a later time.
    *
@@ -84,21 +121,11 @@ class StreamProxy extends EventEmitter {
   }
 
   /**
-   * Processes the collection pipeline and returns
-   * all items in the collection.
+   * Creates the array of streams which build the streaming pipeline.
    *
-   * @returns {StreamProxy}
+   * @returns {Array}
    */
-  pipe (output) {
-    this._process(output).pipe(output)
-  }
-
-  /**
-   * Creates and processes the stream pipeline.
-   *
-   * @returns {Readable}
-   */
-  _process () {
+  _streamsForPipeline () {
     const stream = Stream.inObjectMode(this.objectMode).from(this.items)
     const streams = [stream.asStream()]
 
@@ -106,23 +133,31 @@ class StreamProxy extends EventEmitter {
       const { method, callback, data } = this.callChain.dequeue()
 
       streams.push(
-        callback ? stream[method](callback, data) : stream[method](data)
+        stream[method](callback, data)
       )
     }
 
-    if (streams.length > 1) {
-      return pipeline(
-        ...streams,
-        error => {
-          if (error) {
-            this.emit('error', error)
-            this.emit('end')
-          }
+    return streams
+  }
+
+  /**
+   * Creates and processes the stream pipeline.
+   *
+   * @param destination
+   *
+   * @returns {Readable}
+   */
+  _process () {
+    const streams = this._streamsForPipeline()
+
+    return streams.length === 1
+      ? streams[0]
+      : pipeline(...streams, error => {
+        if (error) {
+          this.emit('error', error)
+          this.emit('end')
         }
-      )
-    }
-
-    return stream.asStream()
+      })
   }
 }
 

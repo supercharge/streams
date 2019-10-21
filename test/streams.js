@@ -28,28 +28,28 @@ describe('Streams', () => {
       }
     })
 
-    expect(
-      await GetStream.array(
-        Stream(stream)
-          .inObjectMode()
-          .filter(item => item > 0)
-          .asStream()
-      )
-    ).to.equal([1, 2])
+    const result = await GetStream.array(
+      await Stream(stream)
+        .inObjectMode()
+        .filter(item => item > 0)
+        .asStream()
+    )
+
+    expect(result).to.equal([1, 2])
   })
 
   it('.filter()', async () => {
-    expect(
-      await GetStream.array(
-        Stream([
-          { name: 'Marcus', supercharged: true },
-          { name: 'Express-Dude', supercharged: false }
-        ])
-          .inObjectMode()
-          .filter(item => item.supercharged)
-          .asStream()
-      )
-    ).to.equal([{ name: 'Marcus', supercharged: true }])
+    const results = await GetStream.array(
+      Stream([
+        { name: 'Marcus', supercharged: true },
+        { name: 'Express-Dude', supercharged: false }
+      ])
+        .inObjectMode()
+        .filter(item => item.supercharged)
+        .asStream()
+    )
+
+    expect(results).to.equal([{ name: 'Marcus', supercharged: true }])
   })
 
   it('.pipe()', async () => {
@@ -57,24 +57,21 @@ describe('Streams', () => {
 
     const output = new Writable({
       objectMode: true,
-
       write (chunk, _, next) {
         result.push(chunk)
         next()
       }
     })
 
-    output.on('finish', () => {
-      expect(result).to.equal([{ name: 'Marcus', supercharged: true }])
-    })
-
-    Stream([
+    await Stream([
       { name: 'Marcus', supercharged: true },
       { name: 'Express-Dude', supercharged: false }
     ])
       .inObjectMode()
       .filter(item => item.supercharged)
       .pipe(output)
+
+    expect(result).to.equal([{ name: 'Marcus', supercharged: true }])
   })
 
   it('.map()', async () => {
@@ -86,36 +83,67 @@ describe('Streams', () => {
         result.push(chunk)
         next()
       }
-    }).on('finish', () => {
-      expect(result).to.equal([2, 4, 6])
     })
 
-    Stream([1, 2, 3])
+    await Stream([1, 2, 3])
       .inObjectMode()
-      .map(item => {
-        return item * 2
-      })
-      .pipe(output)
+      .map(item => item * 2)
+      .into(output)
+
+    expect(result).to.equal([2, 4, 6])
   })
 
-  it('.on("error")', async () => {
+  it('catch error', async () => {
     const output = new Writable({
       objectMode: true,
       write (_, __, next) { next(_) }
     })
-      .on('error', () => {})
 
-    await new Promise(resolve => {
-      Stream([1, 2, 3])
+    try {
+      await Stream([1, 2, 3])
         .inObjectMode()
         .map(() => {
           throw new Error('map error')
         })
-        .on('error', error => {
-          expect(error.message).to.equal('map error')
-          resolve()
+        .into(output)
+
+      expect(true).to.equal(false) // should not be reached
+    } catch (error) {
+      expect(error).to.exist()
+      expect(error.message).to.equal('map error')
+    }
+  })
+
+  it('.on stream error', async () => {
+    let error
+
+    Stream([1, 2, 3])
+      .inObjectMode()
+      .map(() => {
+        throw new Error('stream error')
+      })
+      .on('error', err => {
+        error = err
+      })
+      .on('end', () => {
+        expect(error.message).to.equal('stream error')
+      })
+      .asStream()
+  })
+
+  it('fails to pipe into non-available destination', async () => {
+    try {
+      await Stream([1, 2, 3])
+        .inObjectMode()
+        .map(() => {
+          return 1
         })
-        .pipe(output)
-    })
+        .into()
+
+      expect(true).to.equal(false) // should not be reached
+    } catch (error) {
+      expect(error).to.exist()
+      expect(error.message).to.include('Missing destination')
+    }
   })
 })
