@@ -1,8 +1,10 @@
 'use strict'
 
+const { promisify } = require('util')
+const { pipeline } = require('stream')
+const Pipeline = promisify(pipeline)
 const EventEmitter = require('events')
 const Stream = require('./pending-stream')
-const { pipeline } = require('readable-stream')
 const Queue = require('@supercharge/queue-datastructure')
 
 class StreamProxy extends EventEmitter {
@@ -68,6 +70,19 @@ class StreamProxy extends EventEmitter {
   }
 
   /**
+   * Pipes the stream through the given `transform` function.
+   * You may also pass in an instance of a Node.js
+   * `Transform` stream to this `through` method.
+   *
+   * @param {Function} transform
+   *
+   * @returns {StreamProxy}
+   */
+  through (transform) {
+    return this._enqueue('through', transform)
+  }
+
+  /**
    * Alias for `.pipe`. Processes the streaming
    * pipeline and * ultimately pipes all chunks
    * into the `destination` stream.
@@ -91,17 +106,7 @@ class StreamProxy extends EventEmitter {
 
     const streams = this._streamsForPipeline().concat(destination)
 
-    return new Promise((resolve, reject) => {
-      pipeline(...streams, error => {
-        if (error) {
-          this.emit('end')
-
-          return reject(error)
-        }
-
-        return resolve()
-      })
-    })
+    await Pipeline(...streams)
   }
 
   /**
