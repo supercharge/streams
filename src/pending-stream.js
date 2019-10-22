@@ -2,7 +2,7 @@
 
 const Stream = require('./streams')
 const IntoStream = require('into-stream')
-const { Readable } = require('readable-stream')
+const { Readable } = require('stream')
 
 class PendingStream {
   /**

@@ -1,6 +1,6 @@
 'use strict'
 
-const { Transform } = require('readable-stream')
+const { Transform } = require('stream')
 
 class Streams {
   /**
@@ -63,9 +63,12 @@ class Streams {
    * @returns {Transform}
    */
   through (callback) {
+    if (callback instanceof Transform) {
+      return callback
+    }
+
     return new Transform({
-      readableObjectMode: this.objectMode,
-      writableObjectMode: this.objectMode,
+      objectMode: this.objectMode,
 
       async transform (chunk, encoding, next) {
         try {
