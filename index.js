@@ -2,8 +2,8 @@
 
 const StreamProxy = require('./src/streams-proxy')
 
-const stream = stream => {
-  return new StreamProxy(stream)
+const stream = streamOrItems => {
+  return new StreamProxy(streamOrItems)
 }
 
 module.exports = stream
