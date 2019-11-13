@@ -104,7 +104,7 @@ class StreamProxy extends EventEmitter {
       throw new Error('Missing destination stream for .pipe call')
     }
 
-    const streams = this._streamsForPipeline().concat(destination)
+    const streams = this._createStreamArray().concat(destination)
 
     await Pipeline(...streams)
   }
@@ -130,7 +130,7 @@ class StreamProxy extends EventEmitter {
    *
    * @returns {Array}
    */
-  _streamsForPipeline () {
+  _createStreamArray () {
     const stream = Stream.inObjectMode(this.objectMode).from(this.items)
     const streams = [stream.asStream()]
 
@@ -153,7 +153,7 @@ class StreamProxy extends EventEmitter {
    * @returns {Readable}
    */
   _process () {
-    const streams = this._streamsForPipeline()
+    const streams = this._createStreamArray()
 
     return streams.length === 1
       ? streams[0]
