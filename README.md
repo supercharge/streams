@@ -8,7 +8,7 @@
     <h3>Streams</h3>
   </p>
   <p>
-    <strong><code>async/await-ready</code></strong>, chainable streaming utilities for Node.js
+    Streaming utilities for Node.js based on promises, instead of events.
   </p>
   <br/>
   <p>
@@ -28,6 +28,12 @@
 
 ---
 
+## Introduction
+The native Node.js stream implementation is based on event emitters. It's hard to manage the control flow in your application when using events. If you want to actively wait for a stream to finish, you must wrap it into a promise.
+
+This `@supercharge/streams` package wraps Node.js streams into promises to make them `async/await`-ready. It also provides methods, like `.map()` and `.filter` to interact the data.
+
+
 ## Installation
 
 ```
@@ -36,11 +42,68 @@ npm i @supercharge/streams
 
 
 ## Docs
-Find all the [details and available methods in the extensive Supercharge docs](https://superchargejs.com/docs/streams).
+Find all the [details for `@supercharge/streams` in the extensive Supercharge docs](https://superchargejs.com/docs/streams).
 
 
 ## Usage
-Not yet defined :)
+Using `@supercharge/streams` is pretty straightforward. The package exports a function that accepts data or a read-stream as an input. If the input is not a stream, it transforms it into one.
+
+Here's an example that takes an array with three items and runs it through a streaming pipeline to ultimately writing the result to a file:
+
+```js
+const Stream = require('@supercharge/streams')
+
+await Stream([1, 2, 3])
+  .inObjectMode()
+  .map(item => {
+    return item * 2
+  })
+  .filter(item => {
+    return item > 3
+  })
+  .into(Fs.createWriteStream('./numbers-greater-then-three.csv'))
+```
+
+The `.map()` and `.filter()` methods take a callback as an argument. Under the hood, `@supercharge/streams` creates a transform stream for these methods to run the provided callback.
+
+
+### Object Mode Streams
+Object mode streams come handy when working with arrays to retrieve each item from the array individually.
+
+By default, a stream is not in object mode. You must actively chain the `.inObjectMode()` method in the pipeline:
+
+```js
+const Fs = require('fs')
+const Stream = require('@supercharge/streams')
+
+const users = [
+  { name: 'Marcus', supercharged: true },
+  { name: 'Red John', supercharged: false }
+]
+
+await Stream(users)
+  .inObjectMode()
+  .filter(user => user.supercharged)
+  .into(Fs.createWriteStream('./supercharged-users-export.csv'))
+```
+
+
+### Error Handling
+The native Node.js streams use event emitters and this comes with separate channels for data and errors. The `@supercharge/streams` package transforms the event-based streams into promise-based streams. Promises have a single channel for data and errors.
+
+You must actively catch errors if you don't want them to bubble up in your appplication:
+
+```js
+try {
+  await Stream(input)
+    .map(() => throw new Error('sh*t happens'))
+    .into(output)
+} catch (error) {
+  // handle error
+}
+```
+
+Errors will be thrown as soon as they appear. The stream will stop and clean up without processing the remaining data.
 
 
 ## Contributing
