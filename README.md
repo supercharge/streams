@@ -29,9 +29,15 @@
 ---
 
 ## Introduction
-The native Node.js stream implementation is based on event emitters. It's hard to manage the control flow in your application when using events. If you want to actively wait for a stream to finish, you must wrap it into a promise.
+The native Node.js stream implementation is based on event emitters. It’s hard to manage the control flow in your application when using events. If you want to actively wait for a stream to finish, you must wrap it into a promise.
 
-This `@supercharge/streams` package wraps Node.js streams into promises to make them `async/await`-ready. It also provides methods, like `.map()` and `.filter` to interact the data.
+This `@supercharge/streams` package wraps Node.js streams into promises to make them `async/await`-ready. It provides methods, like
+
+- `.map(callback)`
+- `.filter(callback)`
+- `.through(transformStream)`
+
+to interact with the input data.
 
 
 ## Installation
@@ -48,7 +54,7 @@ Find all the [details for `@supercharge/streams` in the extensive Supercharge do
 ## Usage
 Using `@supercharge/streams` is pretty straightforward. The package exports a function that accepts data or a read-stream as an input. If the input is not a stream, it transforms it into one.
 
-Here's an example that takes an array with three items and runs it through a streaming pipeline to ultimately writing the result to a file:
+Here’s an example that takes an array with three items and runs it through a streaming pipeline to ultimately writing the result to a file:
 
 ```js
 const Stream = require('@supercharge/streams')
@@ -91,7 +97,7 @@ await Stream(users)
 ### Error Handling
 The native Node.js streams use event emitters and this comes with separate channels for data and errors. The `@supercharge/streams` package transforms the event-based streams into promise-based streams. Promises have a single channel for data and errors.
 
-You must actively catch errors if you don't want them to bubble up in your appplication:
+You must actively catch errors if you don’t want them to bubble up in your appplication:
 
 ```js
 try {
