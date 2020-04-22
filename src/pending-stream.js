@@ -1,8 +1,8 @@
 'use strict'
 
 const Stream = require('./streams')
-const IntoStream = require('into-stream')
 const { Readable } = require('stream')
+const IntoStream = require('into-stream')
 
 class PendingStream {
   /**
@@ -35,17 +35,35 @@ class PendingStream {
    * @returns {PendingStream}
    */
   static wrap (items) {
-    if (items instanceof Readable) {
-      this.stream = items
-
-      return this
-    }
-
-    this.stream = this.objectMode
-      ? IntoStream.object(items)
-      : IntoStream(items)
+    this.isReadableStream(items)
+      ? this.stream = items
+      : this.stream = this.createReadableFrom(items)
 
     return this
+  }
+
+  /**
+   * Determine whether the given `stream` is an instance of `Readable`.
+   *
+   * @param {*} stream
+   *
+   * @returns {Boolean}
+   */
+  static isReadableStream (stream) {
+    return stream instanceof Readable
+  }
+
+  /**
+   * Create a stream from the given `items`.
+   *
+   * @param {*} items
+   *
+   * @returns {ReadableStream}
+   */
+  static createReadableFrom (items) {
+    return this.objectMode
+      ? IntoStream.object(items)
+      : IntoStream(items)
   }
 
   /**
