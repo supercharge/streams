@@ -1,12 +1,8 @@
 'use strict'
 
 const Stream = require('..')
-const Lab = require('@hapi/lab')
 const GetStream = require('get-stream')
-const { expect } = require('@hapi/code')
 const { Readable, Writable, Transform } = require('stream')
-
-const { describe, it } = (exports.lab = Lab.script())
 
 describe('Streams', () => {
   it('creates a stream', async () => {
@@ -14,7 +10,7 @@ describe('Streams', () => {
       await GetStream(
         Stream('supercharge').asStream()
       )
-    ).to.equal('supercharge')
+    ).toEqual('supercharge')
   })
 
   it('accepts a stream', async () => {
@@ -35,7 +31,7 @@ describe('Streams', () => {
         .asStream()
     )
 
-    expect(result).to.equal([1, 2])
+    expect(result).toEqual([1, 2])
   })
 
   it('.filter', async () => {
@@ -49,7 +45,7 @@ describe('Streams', () => {
         .asStream()
     )
 
-    expect(results).to.equal([{ name: 'Marcus', supercharged: true }])
+    expect(results).toEqual([{ name: 'Marcus', supercharged: true }])
   })
 
   it('.pipe', async () => {
@@ -71,7 +67,7 @@ describe('Streams', () => {
       .filter(item => item.supercharged)
       .pipe(output)
 
-    expect(result).to.equal([{ name: 'Marcus', supercharged: true }])
+    expect(result).toEqual([{ name: 'Marcus', supercharged: true }])
   })
 
   it('.map', async () => {
@@ -90,7 +86,7 @@ describe('Streams', () => {
       .map(item => item * 2)
       .into(output)
 
-    expect(result).to.equal([2, 4, 6])
+    expect(result).toEqual([2, 4, 6])
   })
 
   it('.through function', async () => {
@@ -111,7 +107,7 @@ describe('Streams', () => {
       })
       .into(output)
 
-    expect(result).to.equal([10, 20, 30])
+    expect(result).toEqual([10, 20, 30])
   })
 
   it('.through transform (into)', async () => {
@@ -139,7 +135,7 @@ describe('Streams', () => {
       .through(item => item * 2)
       .into(output)
 
-    expect(result).to.equal([2, 2, 2])
+    expect(result).toEqual([2, 2, 2])
   })
 
   it('.through transform (as stream)', async () => {
@@ -155,7 +151,7 @@ describe('Streams', () => {
         .asStream()
     )
 
-    expect(result).to.equal([1, 1, 1])
+    expect(result).toEqual([1, 1, 1])
   })
 
   it('pipeline', async () => {
@@ -173,7 +169,7 @@ describe('Streams', () => {
         .asStream()
     )
 
-    expect(result).to.equal([10])
+    expect(result).toEqual([10])
   })
 
   it('catch error', async () => {
@@ -190,10 +186,10 @@ describe('Streams', () => {
         })
         .into(output)
 
-      expect(true).to.equal(false) // should not be reached
+      expect(true).toEqual(false) // should not be reached
     } catch (error) {
-      expect(error).to.exist()
-      expect(error.message).to.equal('map error')
+      expect(error).toBeDefined()
+      expect(error.message).toEqual('map error')
     }
   })
 
@@ -209,7 +205,7 @@ describe('Streams', () => {
         error = err
       })
       .on('end', () => {
-        expect(error.message).to.equal('stream error')
+        expect(error.message).toEqual('stream error')
       })
       .asStream()
   })
@@ -223,10 +219,10 @@ describe('Streams', () => {
         })
         .into()
 
-      expect(true).to.equal(false) // should not be reached
+      expect(true).toEqual(false) // should not be reached
     } catch (error) {
-      expect(error).to.exist()
-      expect(error.message).to.include('Missing destination')
+      expect(error).toBeDefined()
+      expect(error.message).toContain('Missing destination')
     }
   })
 })
