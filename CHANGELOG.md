@@ -8,6 +8,9 @@
 
 ### Updated
 - bump dependencies
+- change `main` entrypoint in `package.json` to `dist` folder
+- move test runner from `@hapi/lab` to `jest`
+- move assertions from `@hapi/code` to `jest`
 
 
 ## 1.0.0 - 2019-11-28
