@@ -26,10 +26,11 @@
   },
   "homepage": "https://github.com/superchargejs/streams",
   "keywords": [
-    "supercharge",
-    "superchargejs",
+    "stream",
     "streams",
-    "nodejs"
+    "nodejs",
+    "supercharge",
+    "superchargejs"
   ],
   "license": "MIT",
   "main": "index.js",
